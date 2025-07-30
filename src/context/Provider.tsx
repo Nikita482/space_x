@@ -10,7 +10,11 @@ type ProviderProps = {
 };
 
 export const Provider = ({ children }: ProviderProps) => {
-  const [state, dispatch] = useReducer(contextReducer, { data: null });
+  const [state, dispatch] = useReducer(contextReducer, {
+    data: null,
+    selectedMission: null,
+    isOpen: false,
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -21,6 +25,8 @@ export const Provider = ({ children }: ProviderProps) => {
         .json<any[]>();
 
       const cleanedData: Launch[] = rawData.map((launch) => ({
+        flight_number: launch.flight_number,
+        launch_date_unix: launch.launch_date_unix,
         mission_name: launch.mission_name,
         rocket: {
           rocket_name: launch.rocket?.rocket_name,
@@ -30,6 +36,7 @@ export const Provider = ({ children }: ProviderProps) => {
           mission_patch_small: launch.links?.mission_patch_small,
         },
         details: launch.details,
+        isOpen: false,
       }));
 
       dispatch({ type: "SET_DATA", payload: cleanedData });
@@ -39,7 +46,14 @@ export const Provider = ({ children }: ProviderProps) => {
   }, []);
 
   return (
-    <MyContext.Provider value={{ data: state.data }}>
+    <MyContext.Provider
+      value={{
+        data: state.data,
+        selectedMission: state.selectedMission,
+        isOpen: state.isOpen,
+        dispatch,
+      }}
+    >
       {children}
     </MyContext.Provider>
   );
